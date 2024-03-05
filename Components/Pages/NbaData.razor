@@ -1,0 +1,48 @@
+@page "/nba-data"
+@inject NbaApiClient NbaApiClient
+
+
+<PageTitle>NBA-DATA</PageTitle>
+<h2>NBA Now</h2>
+
+@if (liveGamesResponse == null || allPlayersResponse == null)
+{
+    <p>Loading stats...</p>
+}
+else
+{
+    <div>
+    <h4>Live Games</h4>
+    <pre>@liveGamesResponse</pre>
+
+    <br>
+
+    <h4>All players</h4>
+    <pre>@allPlayersResponse</pre>
+
+</div>
+}
+
+@code {
+    private string liveGamesResponse;
+    private string allPlayersResponse;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var nbaApiKey = Environment.GetEnvironmentVariable("NBA_API_KEY");
+        if (string.IsNullOrEmpty(nbaApiKey))
+        {
+            liveGamesResponse = "API Key is not set.";
+            allPlayersResponse = "API Key is not set.";
+            return;
+        }
+
+        var liveGamesApiHost = "api-nba-v1.p.rapidapi.com";
+        var liveGamesApiUri = "https://api-nba-v1.p.rapidapi.com/games?live=all";
+        liveGamesResponse = await NbaApiClient.MakeRequestAsync(liveGamesApiUri, nbaApiKey, liveGamesApiHost);
+
+        var allPlayersApiHost = "api-nba-v1.p.rapidapi.com";
+        var allPlayersApiUri = "https://api-nba-v1.p.rapidapi.com/players?team=1&season=2021";
+        allPlayersResponse = await NbaApiClient.MakeRequestAsync(allPlayersApiUri, nbaApiKey, allPlayersApiHost);
+    }
+}
